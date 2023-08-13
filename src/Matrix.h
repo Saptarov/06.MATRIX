@@ -3,19 +3,36 @@
 #include "common.h"
 #define DIMENSION 10
 
+struct pair_key_hash {
+    template <class T1, class T2>
+    std::size_t operator()(const std::pair<T1, T2>& key) const {
+        auto h1 = std::hash<T1>{}(key.first);
+        auto h2 = std::hash<T2>{}(key.second);
+        return h1 ^ h2;
+    }
+};
+
+struct pair_key_cond {
+    template <class T1, class T2>
+    bool operator()(const std::pair<T1, T2>& lhs, const std::pair<T1, T2>& rhs) const {
+        return lhs.first == rhs.first && lhs.second == rhs.second;
+    }
+};
+
 template <typename T, T Default>
 class Matrix {
 private:
-    T _arr[DIMENSION][DIMENSION];
+    std::unordered_map<std::pair<size_t, size_t>, T, pair_key_hash, pair_key_cond> _arr;
     T _default = Default;
-    std::vector<std::tuple<size_t, size_t, T>> filled;
+    std::vector<std::tuple<size_t, size_t, int>> filled;
     size_t readPos = 0;
     class Row;
 public:
+
     Matrix() {
-        for(int i = 0; i < DIMENSION; ++i) {
-            for(int j = 0; j < DIMENSION; ++j) {
-                _arr[i][j] = Default;
+        for(size_t i = 0; i < DIMENSION; ++i) {
+            for(size_t j = 0; j < DIMENSION; ++j) {
+                _arr.insert(std::pair<std::pair<size_t, size_t>, T> {{i, j}, Default});
             }
         }
     }
@@ -25,18 +42,18 @@ public:
     }
 
     T& readData(size_t rowIndex, size_t colIndex) {
-        for(auto& item : filled) {
-            auto& [x, y, v] = item;
-            if (x == rowIndex && y == colIndex) {
-                return v;
-            }
+        auto result = _arr.find({rowIndex, colIndex});
+        if (result != _arr.end()) {
+            return result->second;
         }
-        return (_arr[rowIndex][colIndex] = _default);
+        return _arr[{rowIndex, colIndex}];
     }
 
     void writeData(size_t rowIndex, size_t colIndex, const T& item) {
-        _arr[rowIndex][colIndex] = item;
-        filled.push_back({rowIndex, colIndex, item});
+        auto result = _arr.insert(std::pair<std::pair<size_t, size_t>, T> {{rowIndex, colIndex}, item});
+        if (!result.second) {
+            filled.push_back({rowIndex, colIndex, item});
+        }
     }
 
     size_t size() {

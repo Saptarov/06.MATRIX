@@ -1,13 +1,6 @@
 #include "common.h"
 #include "Matrix.h"
 
-int factorial(int key) {
-    if (key == 0) {
-        return 1;
-    }
-    return key + factorial(key - 1);
-}
-
 int main () {
 
     Matrix<int, 0> matrix;
