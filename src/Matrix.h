@@ -24,34 +24,40 @@ class Matrix {
 private:
     std::unordered_map<std::pair<size_t, size_t>, T, pair_key_hash, pair_key_cond> _arr;
     T _default = Default;
-    std::vector<std::tuple<size_t, size_t, int>> filled;
+    std::vector<std::tuple<size_t, size_t, T>> filled;
     size_t readPos = 0;
     class Row;
 public:
-
-    Matrix() {
-        for(size_t i = 0; i < DIMENSION; ++i) {
-            for(size_t j = 0; j < DIMENSION; ++j) {
-                _arr.insert(std::pair<std::pair<size_t, size_t>, T> {{i, j}, Default});
-            }
-        }
-    }
 
     Row operator [] (int r){
         return {*this, r};
     }
 
-    T& readData(size_t rowIndex, size_t colIndex) {
+    T readData(size_t rowIndex, size_t colIndex) {
         auto result = _arr.find({rowIndex, colIndex});
         if (result != _arr.end()) {
             return result->second;
         }
-        return _arr[{rowIndex, colIndex}];
+        return _default;
     }
 
-    void writeData(size_t rowIndex, size_t colIndex, const T& item) {
+    void writeData(size_t rowIndex, size_t colIndex, T& item) {
+        if (item == _default) {
+            T v = readData(rowIndex, colIndex);
+            if (v != _default) {
+                _arr.erase({rowIndex, colIndex});
+                for(auto iter = filled.begin(); iter != filled.end();) {
+                    auto& [r,c,v] = *iter;
+                    if (r == rowIndex && c == colIndex) {
+                        filled.erase(iter);
+                        continue;
+                    }
+                    ++iter;
+                }
+            }
+        }
         auto result = _arr.insert(std::pair<std::pair<size_t, size_t>, T> {{rowIndex, colIndex}, item});
-        if (!result.second) {
+        if (result.second) {
             filled.push_back({rowIndex, colIndex, item});
         }
     }

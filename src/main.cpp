@@ -42,5 +42,10 @@ int main () {
         std::cout << x << y << v << std::endl;
     }
 
+    Matrix<int, 42> matrix2;
+    assert(42 == matrix2[1000][1000]);
+    matrix2[1][2] = 3; // здесь вставка в _arr
+    matrix2[1][2] = 42; // а здесь удаление из _arr
+
    return 0;
 }
