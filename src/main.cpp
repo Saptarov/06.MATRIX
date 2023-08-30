@@ -9,10 +9,9 @@ int main () {
     }
     for(auto c: matrix)
     {
-        int x;
-        int y;
-        int v;
-        std::tie(x, y, v) = c;
+        int x = c.first.first;
+        int y = c.first.second;
+        int v = c.second;
         std::cout << x << y << v << std::endl;
     }
 
@@ -21,10 +20,9 @@ int main () {
     }
     for(auto c: matrix)
     {
-        int x;
-        int y;
-        int v;
-        std::tie(x, y, v) = c;
+        int x = c.first.first;
+        int y = c.first.second;
+        int v = c.second;
         std::cout << x << y << v << std::endl;
     }
 
@@ -35,10 +33,9 @@ int main () {
     std::cout << matrix.size() << std::endl;
     for(auto c: matrix)
     {
-        int x;
-        int y;
-        int v;
-        std::tie(x, y, v) = c;
+        int x = c.first.first;
+        int y = c.first.second;
+        int v = c.second;
         std::cout << x << y << v << std::endl;
     }
 

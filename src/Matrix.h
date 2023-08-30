@@ -24,7 +24,7 @@ class Matrix {
 private:
     std::unordered_map<std::pair<size_t, size_t>, T, pair_key_hash, pair_key_cond> _arr;
     T _default = Default;
-    std::vector<std::tuple<size_t, size_t, T>> filled;
+    std::unordered_map<std::pair<size_t, size_t>, T, pair_key_hash, pair_key_cond> filled;
     size_t readPos = 0;
     class Row;
 public:
@@ -46,19 +46,18 @@ public:
             T v = readData(rowIndex, colIndex);
             if (v != _default) {
                 _arr.erase({rowIndex, colIndex});
-                for(auto iter = filled.begin(); iter != filled.end();) {
-                    auto& [r,c,v] = *iter;
-                    if (r == rowIndex && c == colIndex) {
+                auto iter = filled.find({rowIndex, colIndex});
+                if (iter != filled.end()) {
+                    //auto& [r,c,v] = *iter;
+                    if (iter->first.first == rowIndex && iter->first.second == colIndex) {
                         filled.erase(iter);
-                        continue;
                     }
-                    ++iter;
                 }
             }
         }
         auto result = _arr.insert(std::pair<std::pair<size_t, size_t>, T> {{rowIndex, colIndex}, item});
         if (result.second) {
-            filled.push_back({rowIndex, colIndex, item});
+            filled.insert({{rowIndex, colIndex}, item});
         }
     }
 
